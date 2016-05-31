@@ -377,39 +377,9 @@ stock SetTextdrawPreviewVehCol(textdrawid,color1,color2)
 	TextDrawShowForAll(TextdrawInfo[textdrawid][ID]);
 	return 1;
 }
-
-public OnFilterScriptInit()
+stock ExportTextdraw(filename[])
 {
-    EditTimer = SetTimer("EditorTimer",100,1);
-	forex(i,MAX_TEXTDRAWS)
-	{
-	    TextdrawInfo[i][ID] = INVALID_TEXT_DRAW;
-	}
-	printf("[ITDS] Ian's Textdraw Studio loaded!");
-	return 1;
-}
-
-public OnFilterScriptExit()
-{
-    forex(i,MAX_TEXTDRAWS)
-	{
-	    if(TextdrawInfo[i][ID] == INVALID_TEXT_DRAW) continue;
-		TextDrawDestroy(TextdrawInfo[i][ID]);
-	}
-	KillTimer(EditTimer);
-    printf("[ITDS] Ian's Textdraw Studio unloaded!");
-	return 1;
-}
-
-CMD:textdraw(playerid,params[])
-{
-    ShowMainMenu(playerid);
-	return 1;
-}
-
-CMD:export(playerid,params[])
-{
-    new File:output = fopen("output.pwn",io_write);
+	new File:output = fopen("output.pwn",io_write);
     new string[256];
     new idx = 1;
     fwrite(output,"#include <a_samp>\n\n#define FILTERSCRIPT\n\n");
@@ -504,6 +474,46 @@ CMD:export(playerid,params[])
 	}
 	fwrite(output,"}");
     fclose(output);
+	return 1;
+}
+
+public OnFilterScriptInit()
+{
+    EditTimer = SetTimer("EditorTimer",100,1);
+	forex(i,MAX_TEXTDRAWS)
+	{
+	    TextdrawInfo[i][ID] = INVALID_TEXT_DRAW;
+	}
+	printf("[ITDS] Ian's Textdraw Studio loaded!");
+	return 1;
+}
+
+public OnFilterScriptExit()
+{
+    forex(i,MAX_TEXTDRAWS)
+	{
+	    if(TextdrawInfo[i][ID] == INVALID_TEXT_DRAW) continue;
+		TextDrawDestroy(TextdrawInfo[i][ID]);
+	}
+	KillTimer(EditTimer);
+    printf("[ITDS] Ian's Textdraw Studio unloaded!");
+	return 1;
+}
+
+CMD:textdraw(playerid,params[])
+{
+    ShowMainMenu(playerid);
+	return 1;
+}
+
+CMD:export(playerid,params[])
+{
+    if(!IsNull(params))
+    {
+    	new dir[32];
+    	format(dir,sizeof(dir),"%s.pwn",params);
+    	ExportTextdraw(dir);
+    }
     return 1;
 }
 
