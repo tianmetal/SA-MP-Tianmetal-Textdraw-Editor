@@ -2,8 +2,6 @@
 
 #define FILTERSCRIPT
 
-#include <YSI\y_commands>
-
 #define MAX_TEXTDRAWS 				(100)
 #define MAX_TEXTDRAW_STRING_LENGTH 	(128)
 
@@ -379,7 +377,7 @@ stock SetTextdrawPreviewVehCol(textdrawid,color1,color2)
 }
 stock ExportTextdraw(filename[])
 {
-	new File:output = fopen("output.pwn",io_write);
+	new File:output = fopen(filename,io_write);
     new string[256];
     new idx = 1;
     fwrite(output,"#include <a_samp>\n\n#define FILTERSCRIPT\n\n");
@@ -500,21 +498,34 @@ public OnFilterScriptExit()
 	return 1;
 }
 
-CMD:textdraw(playerid,params[])
+public OnPlayerCommandText(playerid,cmdtext[])
 {
-    ShowMainMenu(playerid);
+	new cmd[32],params[128],
+		token = 0;
+	cmd = strtok(cmdtext,token);
+	params = strtok(cmdtext,token);
+	if(!strcmp(cmd,"/textdraw",true))
+	{
+		ShowMainMenu(playerid);
+	}
+	else if(!strcmp(cmd,"/export",true))
+	{
+		if(!IsNull(params))
+	    {
+	    	if(strlen(params) <= 16)
+	    	{
+	    		new string[144];
+		    	format(string,sizeof(string),"<TDS> : Textdraws exported to file '%s.pwn' inside server's scriptfiles directory.",params);
+		    	SendClientMessage(playerid,-1,string);
+		    	format(string,sizeof(string),"%s.pwn",params);
+		    	ExportTextdraw(string);
+	    	}
+	    	else SendClientMessage(playerid,0xAAAAAAFF,"<ERROR> : Filename cannot go above 16 characters!");
+	    }
+	    else SendClientMessage(playerid,0xAAAAAAFF,"<SYNTAX> : /export [name]");
+	}
+	else return 0;
 	return 1;
-}
-
-CMD:export(playerid,params[])
-{
-    if(!IsNull(params))
-    {
-    	new dir[32];
-    	format(dir,sizeof(dir),"%s.pwn",params);
-    	ExportTextdraw(dir);
-    }
-    return 1;
 }
 
 public EditorTimer()
